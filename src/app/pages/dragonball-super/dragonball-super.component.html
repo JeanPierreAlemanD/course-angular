@@ -1,0 +1,18 @@
+<h1>DragonBall Super Page</h1>
+<hr />
+
+<div class="row">
+  <div class="col-12 col-sm-6 mt-1">
+    <db-character-add
+      [character]="dbService.characters()"
+      (newCharacter)="dbService.addCharacter($event)"
+    ></db-character-add>
+  </div>
+
+  <div class="col-12 col-sm-6">
+    <db-character-list
+      [listTitle]="'Lista de Poderosos'"
+      [characters]="dbService.characters()"
+    ></db-character-list>
+  </div>
+</div>
