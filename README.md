@@ -26,3 +26,39 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 # course-angular
+
+
+
+
+# 🚀 Cómo Subir una Imagen a Docker Hub
+
+Esta guía describe paso a paso cómo subir una imagen Docker a Docker Hub, desde el login hasta el push final.
+
+---
+
+## 📌 Requisitos
+
+- Tener Docker instalado.
+- Tener una cuenta en Docker Hub.
+- Tener una imagen creada localmente.
+
+---
+
+## 1️⃣ Iniciar sesión en Docker Hub
+
+Desde la terminal, ejecuta:
+
+```bash
+docker login
+
+
+docker images
+
+REPOSITORY        TAG       IMAGE ID       CREATED         SIZE
+dragonball-app    1.0.1     abc123456789   2 hours ago     450MB
+
+
+# Etiquetar la imagen
+##Antes de subir la imagen a Docker Hub, debes etiquetarla con tu usuario:
+
+docker tag NOMBRE_IMAGEN:VERSION USUARIO_DOCKERHUB/NOMBRE_IMAGEN:VERSION
