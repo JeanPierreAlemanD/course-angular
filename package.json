@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "docker:build": "docker build -t dragonball-app ."
+    "docker:build": "docker build -t dragonball-app1.0.2 .",
+    "docker:prod": "ng build --configuration=production && docker build -t dragonball-app1.0.3 ."
   },
   "private": true,
   "dependencies": {
