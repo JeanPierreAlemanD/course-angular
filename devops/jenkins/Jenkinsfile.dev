@@ -1,6 +1,6 @@
 def appName = 'dragon-ball'
-def environment = 'test'
-def PORT = '4500'
+def environment = 'dev'
+def PORT = '4200'
 
 pipeline {
     agent any
