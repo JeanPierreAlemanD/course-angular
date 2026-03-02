@@ -3,57 +3,41 @@ pipeline {
 
     environment {
         IMAGE_NAME = "angular-app"
-        BRANCH = "main"   // 👈 define aquí tu rama
     }
 
     stages {
 
-        stage('Build Docker Image') {
+        stage('Set Environment') {
             steps {
                 script {
-
-                    if (BRANCH == "develop") {
-                        sh "docker build -t ${IMAGE_NAME}:dev ."
+                    if (env.BRANCH_NAME == "develop") {
+                        ENV_TAG = "dev"
+                        PORT = "4201"
                     }
-
-                    if (BRANCH == "release") {
-                        sh "docker build -t ${IMAGE_NAME}:test ."
+                    else if (env.BRANCH_NAME == "release") {
+                        ENV_TAG = "test"
+                        PORT = "4202"
                     }
-
-                    if (BRANCH == "main") {
-                        sh "docker build -t ${IMAGE_NAME}:prod ."
+                    else if (env.BRANCH_NAME == "main") {
+                        ENV_TAG = "prod"
+                        PORT = "80"
                     }
-
                 }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${ENV_TAG} ."
             }
         }
 
         stage('Deploy') {
             steps {
-                script {
-
-                    if (BRANCH == "develop") {
-                        sh """
-                        docker rm -f angular-dev || true
-                        docker run -d -p 4201:80 --name angular-dev ${IMAGE_NAME}:dev
-                        """
-                    }
-
-                    if (BRANCH == "release") {
-                        sh """
-                        docker rm -f angular-test || true
-                        docker run -d -p 4202:80 --name angular-test ${IMAGE_NAME}:test
-                        """
-                    }
-
-                    if (BRANCH == "main") {
-                        sh """
-                        docker rm -f angular-prod || true
-                        docker run -d -p 80:80 --name angular-prod ${IMAGE_NAME}:prod
-                        """
-                    }
-
-                }
+                sh """
+                docker rm -f angular-${ENV_TAG} || true
+                docker run -d -p ${PORT}:80 --name angular-${ENV_TAG} ${IMAGE_NAME}:${ENV_TAG}
+                """
             }
         }
     }
