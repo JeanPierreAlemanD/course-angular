@@ -3,30 +3,27 @@ pipeline {
 
     environment {
         IMAGE_NAME = "angular-app"
+        BRANCH = "main"   // 👈 define aquí tu rama
     }
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git branch: "${env.BRANCH_NAME}", 
-                    url: 'https://github.com/JeanPierreAlemanD/course-angular.git',
-                    credentialsId: 'github-token'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == "develop") {
+
+                    if (BRANCH == "develop") {
                         sh "docker build -t ${IMAGE_NAME}:dev ."
                     }
-                    if (env.BRANCH_NAME == "release") {
+
+                    if (BRANCH == "release") {
                         sh "docker build -t ${IMAGE_NAME}:test ."
                     }
-                    if (env.BRANCH_NAME == "main") {
+
+                    if (BRANCH == "main") {
                         sh "docker build -t ${IMAGE_NAME}:prod ."
                     }
+
                 }
             }
         }
@@ -35,21 +32,21 @@ pipeline {
             steps {
                 script {
 
-                    if (env.BRANCH_NAME == "develop") {
+                    if (BRANCH == "develop") {
                         sh """
                         docker rm -f angular-dev || true
                         docker run -d -p 4201:80 --name angular-dev ${IMAGE_NAME}:dev
                         """
                     }
 
-                    if (env.BRANCH_NAME == "release") {
+                    if (BRANCH == "release") {
                         sh """
                         docker rm -f angular-test || true
                         docker run -d -p 4202:80 --name angular-test ${IMAGE_NAME}:test
                         """
                     }
 
-                    if (env.BRANCH_NAME == "main") {
+                    if (BRANCH == "main") {
                         sh """
                         docker rm -f angular-prod || true
                         docker run -d -p 80:80 --name angular-prod ${IMAGE_NAME}:prod
