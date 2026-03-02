@@ -61,26 +61,31 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
-            steps {
-                sh """
+    stage('Deploy') {
+    steps {
+        script {
+
+            def PORT = ""
+
+            if (params.ENVIRONMENT == "dev") {
+                PORT = "4200"
+            } else if (params.ENVIRONMENT == "qa") {
+                PORT = "4300"
+            } else {
+                PORT = "80"
+            }
+
+            sh """
                 docker stop myapp-${params.ENVIRONMENT} || true
                 docker rm myapp-${params.ENVIRONMENT} || true
 
-                if [ "${params.ENVIRONMENT}" = "dev" ]; then
-                  PORT=4200
-                elif [ "${params.ENVIRONMENT}" = "qa" ]; then
-                  PORT=4300
-                else
-                  PORT=80
-                fi
-
                 docker run -d \
-                  -p $PORT:80 \
+                  -p ${PORT}:80 \
                   --name myapp-${params.ENVIRONMENT} \
                   myapp:${params.ENVIRONMENT}
-                """
-            }
+            """
         }
+    }
+}
     }
 }
