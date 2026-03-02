@@ -1,44 +1,47 @@
+def appName='dragon-ball'
+
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "angular-app"
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Ambiente')
     }
 
     stages {
 
-        stage('Set Environment') {
-            steps {
-                script {
-                    if (env.BRANCH_NAME == "develop") {
-                        ENV_TAG = "dev"
-                        PORT = "4201"
-                    }
-                    else if (env.BRANCH_NAME == "release") {
-                        ENV_TAG = "test"
-                        PORT = "4202"
-                    }
-                    else if (env.BRANCH_NAME == "main") {
-                        ENV_TAG = "prod"
-                        PORT = "80"
-                    }
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${ENV_TAG} ."
-            }
-        }
-
-        stage('Deploy') {
-            steps {
                 sh """
-                docker rm -f angular-${ENV_TAG} || true
-                docker run -d -p ${PORT}:80 --name angular-${ENV_TAG} ${IMAGE_NAME}:${ENV_TAG}
+                docker build -t ${appName}:${params.ENVIRONMENT} .
                 """
             }
         }
+
+    stage('Deploy') {
+    steps {
+        script {
+
+            def PORT = ""
+
+            if (params.ENVIRONMENT == "dev") {
+                PORT = "4200"
+            } else if (params.ENVIRONMENT == "qa") {
+                PORT = "4300"
+            } else {
+                PORT = "80"
+            }
+
+            sh """
+                docker stop ${appName}-${params.ENVIRONMENT} || true
+                docker rm ${appName}-${params.ENVIRONMENT} || true
+
+                docker run -d \
+                  -p ${PORT}:80 \
+                  --name ${appName}-${params.ENVIRONMENT} \
+                  ${appName}:${params.ENVIRONMENT}
+            """
+        }
+    }
+}
     }
 }
