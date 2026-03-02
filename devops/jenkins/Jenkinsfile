@@ -44,6 +44,8 @@
 // }
 
 
+def appName='dragon-ball'
+
 pipeline {
     agent any
 
@@ -56,7 +58,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh """
-                docker build -t myapp:${params.ENVIRONMENT} .
+                docker build -t ${appName}:${params.ENVIRONMENT} .
                 """
             }
         }
@@ -76,13 +78,13 @@ pipeline {
             }
 
             sh """
-                docker stop myapp-${params.ENVIRONMENT} || true
-                docker rm myapp-${params.ENVIRONMENT} || true
+                docker stop ${appName}-${params.ENVIRONMENT} || true
+                docker rm ${appName}-${params.ENVIRONMENT} || true
 
                 docker run -d \
                   -p ${PORT}:80 \
-                  --name myapp-${params.ENVIRONMENT} \
-                  myapp:${params.ENVIRONMENT}
+                  --name ${appName}-${params.ENVIRONMENT} \
+                  ${appName}:${params.ENVIRONMENT}
             """
         }
     }
