@@ -1,16 +1,18 @@
-def appName = 'dragon-ball'
-def environment = 'dev'
-def PORT = '4200'
-
 pipeline {
     agent any
+
+       environment {
+        APP_NAME = 'dragon-ball'
+        ENVIRONMENT = 'dev'
+        PORT = '4200'
+    }
 
     stages {
 
         stage('Build Docker Image') {
             steps {
                 sh """
-                docker build -t ${appName}:${environment} .
+                docker build -t ${APP_NAME}:${ENVIRONMENT} .
                 """
             }
         }
@@ -18,13 +20,13 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh """
-                docker stop ${appName}-${environment} || true
-                docker rm ${appName}-${environment} || true
+                docker stop ${APP_NAME}-${ENVIRONMENT} || true
+                docker rm ${APP_NAME}-${ENVIRONMENT} || true
 
                 docker run -d \
                   -p ${PORT}:80 \
-                  --name ${appName}-${environment} \
-                  ${appName}:${environment}
+                  --name ${APP_NAME}-${ENVIRONMENT} \
+                  ${APP_NAME}:${ENVIRONMENT}
                 """
             }
         }
