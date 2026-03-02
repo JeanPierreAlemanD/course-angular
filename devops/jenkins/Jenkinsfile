@@ -52,10 +52,6 @@ pipeline {
         }
     }
 
-    parameters {
-        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Selecciona el ambiente')
-    }
-
     stages {
 
         stage('Install') {
@@ -64,15 +60,15 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Production') {
             steps {
-                sh "npm run build -- --configuration=${params.ENVIRONMENT}"
+                sh 'npm run build -- --configuration=production'
             }
         }
 
         stage('Deploy') {
             steps {
-                sh "echo Desplegando a ${params.ENVIRONMENT}"
+                sh 'echo Deploying production build'
             }
         }
     }
