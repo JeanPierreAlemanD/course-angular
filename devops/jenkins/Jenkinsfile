@@ -1,42 +1,74 @@
+// pipeline {
+//     agent any
+
+//     environment {
+//         IMAGE_NAME = "angular-app"
+//     }
+
+//     stages {
+
+//         stage('Set Environment') {
+//             steps {
+//                 script {
+//                     if (env.BRANCH_NAME == "develop") {
+//                         ENV_TAG = "dev"
+//                         PORT = "4201"
+//                     }
+//                     else if (env.BRANCH_NAME == "release") {
+//                         ENV_TAG = "test"
+//                         PORT = "4202"
+//                     }
+//                     else if (env.BRANCH_NAME == "main") {
+//                         ENV_TAG = "prod"
+//                         PORT = "80"
+//                     }
+//                 }
+//             }
+//         }
+
+//         stage('Build Docker Image') {
+//             steps {
+//                 sh "docker build -t ${IMAGE_NAME}:${ENV_TAG} ."
+//             }
+//         }
+
+//         stage('Deploy') {
+//             steps {
+//                 sh """
+//                 docker rm -f angular-${ENV_TAG} || true
+//                 docker run -d -p ${PORT}:80 --name angular-${ENV_TAG} ${IMAGE_NAME}:${ENV_TAG}
+//                 """
+//             }
+//         }
+//     }
+// }
+
+
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "angular-app"
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Selecciona el ambiente')
     }
 
     stages {
 
-        stage('Set Environment') {
+        stage('Install') {
             steps {
-                script {
-                    if (env.BRANCH_NAME == "develop") {
-                        ENV_TAG = "dev"
-                        PORT = "4201"
-                    }
-                    else if (env.BRANCH_NAME == "release") {
-                        ENV_TAG = "test"
-                        PORT = "4202"
-                    }
-                    else if (env.BRANCH_NAME == "main") {
-                        ENV_TAG = "prod"
-                        PORT = "80"
-                    }
-                }
+                sh 'npm install'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
-                sh "docker build -t ${IMAGE_NAME}:${ENV_TAG} ."
+                sh "npm run build -- --configuration=${params.ENVIRONMENT}"
             }
         }
 
         stage('Deploy') {
             steps {
                 sh """
-                docker rm -f angular-${ENV_TAG} || true
-                docker run -d -p ${PORT}:80 --name angular-${ENV_TAG} ${IMAGE_NAME}:${ENV_TAG}
+                echo "Desplegando a ${params.ENVIRONMENT}"
                 """
             }
         }
