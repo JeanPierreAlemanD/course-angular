@@ -1,0 +1,63 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = "angular-app"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: "${env.BRANCH_NAME}", 
+                    url: 'https://github.com/TU_USUARIO/TU_REPO.git',
+                    credentialsId: 'github-token'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    if (env.BRANCH_NAME == "develop") {
+                        sh "docker build -t ${IMAGE_NAME}:dev ."
+                    }
+                    if (env.BRANCH_NAME == "release") {
+                        sh "docker build -t ${IMAGE_NAME}:test ."
+                    }
+                    if (env.BRANCH_NAME == "main") {
+                        sh "docker build -t ${IMAGE_NAME}:prod ."
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+
+                    if (env.BRANCH_NAME == "develop") {
+                        sh """
+                        docker rm -f angular-dev || true
+                        docker run -d -p 4201:80 --name angular-dev ${IMAGE_NAME}:dev
+                        """
+                    }
+
+                    if (env.BRANCH_NAME == "release") {
+                        sh """
+                        docker rm -f angular-test || true
+                        docker run -d -p 4202:80 --name angular-test ${IMAGE_NAME}:test
+                        """
+                    }
+
+                    if (env.BRANCH_NAME == "main") {
+                        sh """
+                        docker rm -f angular-prod || true
+                        docker run -d -p 80:80 --name angular-prod ${IMAGE_NAME}:prod
+                        """
+                    }
+
+                }
+            }
+        }
+    }
+}
