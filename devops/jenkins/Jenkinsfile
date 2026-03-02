@@ -45,30 +45,41 @@
 
 
 pipeline {
-    agent {
-        docker {
-            image 'node:20'
-            args '-u root:root'
-        }
+    agent any
+
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Ambiente')
     }
 
     stages {
 
-        stage('Install') {
+        stage('Build Docker Image') {
             steps {
-                sh 'npm install'
-            }
-        }
-
-        stage('Build Production') {
-            steps {
-                sh 'npm run build -- --configuration=production'
+                sh """
+                docker build -t myapp:${params.ENVIRONMENT} .
+                """
             }
         }
 
         stage('Deploy') {
             steps {
-                sh 'echo Deploying production build'
+                sh """
+                docker stop myapp-${params.ENVIRONMENT} || true
+                docker rm myapp-${params.ENVIRONMENT} || true
+
+                if [ "${params.ENVIRONMENT}" = "dev" ]; then
+                  PORT=4200
+                elif [ "${params.ENVIRONMENT}" = "qa" ]; then
+                  PORT=4300
+                else
+                  PORT=80
+                fi
+
+                docker run -d \
+                  -p $PORT:80 \
+                  --name myapp-${params.ENVIRONMENT} \
+                  myapp:${params.ENVIRONMENT}
+                """
             }
         }
     }
