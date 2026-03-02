@@ -61,4 +61,22 @@ dragonball-app    1.0.1     abc123456789   2 hours ago     450MB
 # Etiquetar la imagen
 ##Antes de subir la imagen a Docker Hub, debes etiquetarla con tu usuario:
 
-docker tag NOMBRE_IMAGEN:VERSION USUARIO_DOCKERHUB/NOMBRE_IMAGEN:VERSION
+1.-login y push en docker:
+		docker login
+	#Te pedirá:Username, Password
+	Si dice Login Succeeded → listo.
+
+2.-Etiquetar Imagen
+	ver imagen docker cmd:
+	docker images
+	2.1.- Ahora la etiquetas con tu usuario de Docker Hub:
+	el docker tag es el nombre que le das cuando lo compilas es importante la version
+	      docker tag dragonball-app:1.0.1 jeanaleman/dragonball-app:1.0.1
+3.- push:
+		docker push jeanaleman/dragonball-app:1.0.1
+					 nombre  / repo          :version	
+
+4.- buscar la imagen en dockerhub:
+         docker pull jeanaleman/dragonball-app-public:1.0.3
+		              dentro de la imagen te indican el comando
+		
